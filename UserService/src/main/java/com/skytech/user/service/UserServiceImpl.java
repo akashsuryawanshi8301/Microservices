@@ -1,6 +1,7 @@
 package com.skytech.user.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,15 @@ public class UserServiceImpl implements UserService {
 		
 		return userRepository.findById(userId)
 				.orElseThrow(() -> new ResourceNotFoundException("User with given userLd not found on server :" + userId));
+	}
+
+	@Override
+	public void deleteUser(String userId) {
+		
+		userRepository.findById(userId).ifPresentOrElse(user -> userRepository.deleteById(userId), () ->{
+			throw new ResourceNotFoundException("User with given userLd not found on server :" + userId);
+		});
+		
 	}
 
 }
