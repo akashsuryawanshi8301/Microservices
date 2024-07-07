@@ -1,12 +1,22 @@
 package com.skytech.user.service;
 
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import com.skytech.user.entities.Hotel;
+import com.skytech.user.entities.Rating;
 import com.skytech.user.entities.User;
 import com.skytech.user.repository.UserRepository;
 
@@ -16,7 +26,14 @@ import exceptions.ResourceNotFoundException;
 public class UserServiceImpl implements UserService {
 	
 	@Autowired
-	UserRepository userRepository;
+	private UserRepository userRepository;
+	
+	@Autowired
+	private RestTemplate restTemplate;
+	
+	private org.slf4j.Logger logger =  LoggerFactory.getLogger(UserServiceImpl.class);
+
+	
 
 	@Override
 	public User saveUser(User user) {
@@ -34,8 +51,35 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User getUser(String userId) {
 		
-		return userRepository.findById(userId)
+		 User user = userRepository.findById(userId)
 				.orElseThrow(() -> new ResourceNotFoundException("User with given userLd not found on server :" + userId));
+		 
+		
+		 // get rating from userid
+		 Rating[] ratingsOfUser = restTemplate.getForObject("http://localhost:8083/ratings/user/"+user.getUserId(), Rating[].class);
+		 logger.info("{}",ratingsOfUser);
+		 
+		 // convert array to list
+		 List<Rating> ratings= Arrays.asList(ratingsOfUser);
+		 
+		 // iterate each rating and set hotels
+		List<Rating> ratingList = ratings.stream().map(rating -> {
+			 
+			 ResponseEntity<Hotel> hotelResponse = restTemplate.getForEntity("http://localhost:8082/hotel/e8fe0967-803a-4b94-a145-2a86ad15909c", Hotel.class);
+			 
+				Hotel hotel = hotelResponse.getBody();
+				
+				rating.setHotel(hotel);
+				
+				return rating;
+			 
+			 
+		 }).collect(Collectors.toList());
+		 // get hotel using ratingId
+		
+		 user.setRatings(ratingList);
+		 
+		 return user;
 	}
 
 	@Override

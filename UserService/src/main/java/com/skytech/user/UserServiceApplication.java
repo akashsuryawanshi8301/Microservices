@@ -2,12 +2,14 @@ package com.skytech.user;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication
-public class DemoApplication {
+@EnableDiscoveryClient
+public class UserServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
+		SpringApplication.run(UserServiceApplication.class, args);
 	}
 
 }
