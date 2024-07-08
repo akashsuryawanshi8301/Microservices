@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import com.skytech.user.entities.Hotel;
 import com.skytech.user.entities.Rating;
 import com.skytech.user.entities.User;
+import com.skytech.user.externalservices.HotelService;
 import com.skytech.user.repository.UserRepository;
 
 import exceptions.ResourceNotFoundException;
@@ -30,6 +31,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
 	private RestTemplate restTemplate;
+	
+	@Autowired
+	private HotelService hotelService;
 	
 	private org.slf4j.Logger logger =  LoggerFactory.getLogger(UserServiceImpl.class);
 
@@ -56,8 +60,8 @@ public class UserServiceImpl implements UserService {
 		 
 		
 		 // get rating from userid
-		 Rating[] ratingsOfUser = restTemplate.getForObject("http://localhost:8083/ratings/user/"+user.getUserId(), Rating[].class);
-		 logger.info("{}",ratingsOfUser);
+		 Rating[] ratingsOfUser = restTemplate.getForObject("http://RATINGSERVICE/ratings/user/"+user.getUserId(), Rating[].class);
+		 //logger.info("{}",ratingsOfUser);
 		 
 		 // convert array to list
 		 List<Rating> ratings= Arrays.asList(ratingsOfUser);
@@ -65,9 +69,11 @@ public class UserServiceImpl implements UserService {
 		 // iterate each rating and set hotels
 		List<Rating> ratingList = ratings.stream().map(rating -> {
 			 
-			 ResponseEntity<Hotel> hotelResponse = restTemplate.getForEntity("http://localhost:8082/hotel/e8fe0967-803a-4b94-a145-2a86ad15909c", Hotel.class);
+			 //ResponseEntity<Hotel> hotelResponse = restTemplate.getForEntity("http://HOTELSERVICE/hotel/e8fe0967-803a-4b94-a145-2a86ad15909c", Hotel.class);
 			 
-				Hotel hotel = hotelResponse.getBody();
+				//Hotel hotel = hotelResponse.getBody();
+			
+			Hotel hotel = hotelService.getHotel(rating.getHotelId());
 				
 				rating.setHotel(hotel);
 				
