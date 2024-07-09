@@ -58,30 +58,20 @@ public class UserServiceImpl implements UserService {
 		 User user = userRepository.findById(userId)
 				.orElseThrow(() -> new ResourceNotFoundException("User with given userLd not found on server :" + userId));
 		 
-		
-		 // get rating from userid
 		 Rating[] ratingsOfUser = restTemplate.getForObject("http://RATINGSERVICE/ratings/user/"+user.getUserId(), Rating[].class);
-		 //logger.info("{}",ratingsOfUser);
 		 
-		 // convert array to list
+		 
 		 List<Rating> ratings= Arrays.asList(ratingsOfUser);
 		 
-		 // iterate each rating and set hotels
 		List<Rating> ratingList = ratings.stream().map(rating -> {
 			 
-			 //ResponseEntity<Hotel> hotelResponse = restTemplate.getForEntity("http://HOTELSERVICE/hotel/e8fe0967-803a-4b94-a145-2a86ad15909c", Hotel.class);
-			 
-				//Hotel hotel = hotelResponse.getBody();
-			
 			Hotel hotel = hotelService.getHotel(rating.getHotelId());
 				
 				rating.setHotel(hotel);
 				
 				return rating;
 			 
-			 
 		 }).collect(Collectors.toList());
-		 // get hotel using ratingId
 		
 		 user.setRatings(ratingList);
 		 
