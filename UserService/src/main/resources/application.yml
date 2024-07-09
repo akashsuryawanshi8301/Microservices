@@ -15,16 +15,14 @@ spring:
     show-sql: true
     
   
-eureka:
-  instance:
-    prefer-ip-address: true
+  
+  config:
+    import: optional:configserver:http://localhost:8085
     
-  client:
-    fetch-registry: true
-    register-with-eureka: true
+  profiles:
+    active:
+    - dev
     
-    service-url:
-      defaultZone: http://localhost:8761/eureka
     
 server:
   port: 8081
